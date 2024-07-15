@@ -1,18 +1,17 @@
-// https://cdn.jsdelivr.net/gh/roostergrin/tracking_script@1.0.0/whole_tracking_script.js
-
 // For Twortho
-// https://www.twortho.com/contact-us/request-appointment/
 
 var CRM = {
-    init: function(config) {
+    init: function (config) {
         this.token = config.token; // Store the authorization key
         this.setupEventListeners(); // Setup event listeners after initialization
         this.loadExternalScripts(); // Load external scripts like Fuse.js
     },
 
     setupEventListeners: function() {
-        window.addEventListener('load', this.handlePageVisit.bind(this));
-        window.addEventListener('beforeunload', this.transferSessionToLocalStorage.bind(this));
+        this.handlePageVisit();
+        window.addEventListener('beforeunload', () => {
+            this.transferSessionToLocalStorage();
+        });
         document.addEventListener('DOMContentLoaded', () => {
             document.body.addEventListener('click', this.handleTelecomLinkClick.bind(this));
             this.setupFormHandling.bind(this)();
@@ -28,7 +27,7 @@ var CRM = {
         document.head.appendChild(fuseScript);
     },
 
-    handlePageVisit: function() {
+    handlePageVisit: function () {
         this.handleEvent('pageview');
     },
 
@@ -39,8 +38,7 @@ var CRM = {
 
     handleEvent: function(type) {
         console.log('handleEvent', type);
-        console.log("sessionTrackingData", sessionStorage.getItem('sessionTrackingData'));
-        debugger;
+        console.log("initial sessionTrackingData", sessionStorage.getItem('sessionTrackingData'));
         try {
             var existingSessionData = JSON.parse(sessionStorage.getItem('sessionTrackingData')) || { sessionId: new Date().toISOString(), trackingParams: this.collectInitialPageVisitData(), events: {} };
             var timestamp = new Date().toISOString();
@@ -49,6 +47,7 @@ var CRM = {
                 date: timestamp,
             };
             sessionStorage.setItem('sessionTrackingData', JSON.stringify(existingSessionData));
+            console.log('sessionTrackingData', sessionStorage.getItem('sessionTrackingData'));
         } catch (error) {
             console.error('Failed to handle event:', error);
         }
