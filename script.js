@@ -38,6 +38,9 @@ var CRM = {
     },
 
     handleEvent: function(type) {
+        console.log('handleEvent', type);
+        console.log("sessionTrackingData", sessionStorage.getItem('sessionTrackingData'));
+        debugger;
         try {
             var existingSessionData = JSON.parse(sessionStorage.getItem('sessionTrackingData')) || { sessionId: new Date().toISOString(), trackingParams: this.collectInitialPageVisitData(), events: {} };
             var timestamp = new Date().toISOString();
@@ -56,8 +59,10 @@ var CRM = {
             var sessionData = JSON.parse(sessionStorage.getItem('sessionTrackingData'));
             if (sessionData) {
                 var existingLocalData = JSON.parse(localStorage.getItem('trackingHistory')) || [];
-                existingLocalData[sessionData.sessionId] = sessionData;
-                localStorage.setItem('trackingHistory', JSON.stringify(existingLocalData));
+                existingLocalData.push(sessionData); // Push the new session data into the array
+                // localStorage.removeItem('trackingHistory'); // Ensure data is stringified before storing
+                localStorage.setItem('trackingHistory', JSON.stringify(existingLocalData)); // Ensure data is stringified before storing
+                console.log('trackingHistory', localStorage.getItem('trackingHistory'));
             }
             sessionStorage.removeItem('sessionTrackingData');
         } catch (error) {
@@ -141,8 +146,20 @@ var CRM = {
         const email = getFuzzyData('Email');
         const phone = getFuzzyData('Phone');
 
+        let trackingData;
         // Retrieve tracking data from session storage
-        const trackingData = JSON.parse(sessionStorage.getItem('sessionTrackingData'))?.trackingParams;
+        var trackingHistory = localStorage.getItem('trackingHistory');
+        if (trackingHistory) {
+            var trackingHistoryArray = JSON.parse(trackingHistory);
+            var firstElement = trackingHistoryArray[0]; // Access the first element of the array
+        }
+        
+        if (firstElement) {
+            trackingData = firstElement.trackingParams
+        } else {
+            trackingData = JSON.parse(sessionStorage.getItem('sessionTrackingData')).trackingParams
+        }
+
         const { referrerSource, source: utmSource, campaign } = trackingData;
 
         const baseUrl = 'https://api.threadcommunication.com';

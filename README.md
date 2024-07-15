@@ -14,9 +14,14 @@ This repository contains a tracking script designed for TW Ortho's website, spec
 
 To use the tracking script, include it in your HTML file:
 
-## Link to Script
-Tracking Script v1.0.0: [https://cdn.jsdelivr.net/gh/roostergrin/tracking_script@1.0.0/whole_tracking_script.js](https://cdn.jsdelivr.net/gh/roostergrin/tracking_script@1.0.0/whole_tracking_script.js)
-<script>
+```html
+<script src="https://cdn.jsdelivr.net/gh/roostergrin/tracking_script@1.0.0/whole_tracking_script.js"></script>
+<script type="text/javascript">
+    CRM.init({
+        token: "your_authorization_key_here"
+    });
+</script>
+```
 
 ## Additional Information
 For more information on how to use jsDelivr to load GitHub releases, commits, or branches, visit [jsDelivr Documentation](https://www.jsdelivr.com/?docs=gh).
