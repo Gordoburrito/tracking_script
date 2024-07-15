@@ -16,6 +16,7 @@ To use the tracking script, include it in your HTML file:
 
 ## Link to Script
 Tracking Script v1.0.0: [https://cdn.jsdelivr.net/gh/roostergrin/tracking_script@1.0.0/whole_tracking_script.js](https://cdn.jsdelivr.net/gh/roostergrin/tracking_script@1.0.0/whole_tracking_script.js)
+<script>
 
 ## Additional Information
 For more information on how to use jsDelivr to load GitHub releases, commits, or branches, visit [jsDelivr Documentation](https://www.jsdelivr.com/?docs=gh).
