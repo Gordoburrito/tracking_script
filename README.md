@@ -15,7 +15,7 @@ This repository contains a tracking script designed for TW Ortho's website, spec
 To use the tracking script, include it in your HTML file:
 
 ```html
-<script src="https://cdn.jsdelivr.net/gh/roostergrin/tracking_script@1.0.0/whole_tracking_script.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/roostergrin/crm_frontend_integration/script.js"></script>
 <script type="text/javascript">
     CRM.init({
         token: "your_authorization_key_here"
