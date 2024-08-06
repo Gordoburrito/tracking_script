@@ -1,4 +1,4 @@
-// For Twortho
+// For https://www.twortho.com/
 
 var CRM = {
     init: function (config) {
@@ -22,7 +22,7 @@ var CRM = {
         const fuseScript = document.createElement('script');
         fuseScript.src = 'https://cdn.jsdelivr.net/npm/fuse.js/dist/fuse.min.js';
         fuseScript.onload = () => {
-            this.initializeFormHandling();
+            this.setupFormHandling();
         };
         document.head.appendChild(fuseScript);
     },
@@ -55,17 +55,22 @@ var CRM = {
 
     transferSessionToLocalStorage: function() {
         try {
-            var sessionData = JSON.parse(sessionStorage.getItem('sessionTrackingData'));
+            const sessionData = JSON.parse(sessionStorage.getItem('sessionTrackingData'))
             if (sessionData) {
-                var existingLocalData = JSON.parse(localStorage.getItem('trackingHistory')) || [];
-                existingLocalData.push(sessionData); // Push the new session data into the array
-                // localStorage.removeItem('trackingHistory'); // Ensure data is stringified before storing
-                localStorage.setItem('trackingHistory', JSON.stringify(existingLocalData)); // Ensure data is stringified before storing
-                console.log('trackingHistory', localStorage.getItem('trackingHistory'));
+                let existingLocalData = JSON.parse(localStorage.getItem('trackingHistory'))
+                if (!existingLocalData || Array.isArray(existingLocalData)) {
+                    existingLocalData = {}
+                }
+                existingLocalData[sessionData.sessionId] = { sessionData, sessionStart: sessionData.trackingParams.timestamp, sessionEnd: new Date().toISOString() }
+                localStorage.setItem(
+                    'trackingHistory',
+                    JSON.stringify(existingLocalData)
+                )
             }
-            sessionStorage.removeItem('sessionTrackingData');
-        } catch (error) {
-            console.error('Failed to transfer session data:', error);
+            sessionStorage.removeItem('sessionTrackingData')
+        }
+        catch (error) {
+            console.error('Failed to transfer session data:', error)
         }
     },
 
@@ -146,17 +151,22 @@ var CRM = {
         const phone = getFuzzyData('Phone');
 
         let trackingData;
-        // Retrieve tracking data from session storage
+        this.transferSessionToLocalStorage();
         var trackingHistory = localStorage.getItem('trackingHistory');
         if (trackingHistory) {
-            var trackingHistoryArray = JSON.parse(trackingHistory);
-            var firstElement = trackingHistoryArray[0]; // Access the first element of the array
+            var trackingHistory = JSON.parse(trackingHistory);
+            var firstKey = Object.keys(trackingHistory)[0];
+            var firstElement = trackingHistory[firstKey];
         }
-        
+
         if (firstElement) {
-            trackingData = firstElement.trackingParams
+            trackingData = firstElement.sessionData.trackingParams;
         } else {
-            trackingData = JSON.parse(sessionStorage.getItem('sessionTrackingData')).trackingParams
+            trackingData = {
+                referrerSource: null,
+                source: null,
+                campaign: null
+            };
         }
 
         const { referrerSource, source: utmSource, campaign } = trackingData;
