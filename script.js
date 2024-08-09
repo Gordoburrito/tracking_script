@@ -1,39 +1,48 @@
-// For https://www.twortho.com/
+// Utility module for API calls
+var APIModule = {
+    baseUrl: 'https://api.threadcommunication.com',
+    token: "unspecified_token!",
 
-var CRM = {
-    init: function (config) {
-        this.token = config.token; // Store the authorization key
-        this.setupEventListeners(); // Setup event listeners after initialization
-        this.loadExternalScripts(); // Load external scripts like Fuse.js
+    init: function(token) {
+        this.token = token;
+    },
+
+    post: async function(endpoint, data) {
+        try {
+            const response = await fetch(`${this.baseUrl}${endpoint}`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': this.token,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+            });
+            const responseData = await response.json();
+            if (responseData.message) {
+                console.warn(responseData.message);
+            }
+            console.log('Success:', responseData);
+            return responseData;
+        } catch (error) {
+            console.error('Error:', error);
+            throw error;
+        }
+    }
+};
+
+// Module for tracking user activity
+var TrackingModule = {
+    init: function() {
+        this.setupEventListeners();
+        this.handlePageVisit();
     },
 
     setupEventListeners: function() {
-        this.handlePageVisit();
-        window.addEventListener('beforeunload', () => {
-            this.transferSessionToLocalStorage();
-        });
-        document.addEventListener('DOMContentLoaded', () => {
-            document.body.addEventListener('click', this.handleTelecomLinkClick.bind(this));
-            this.setupFormHandling.bind(this)();
-        });
+        window.addEventListener('beforeunload', this.transferSessionToLocalStorage);
     },
 
-    loadExternalScripts: function() {
-        const fuseScript = document.createElement('script');
-        fuseScript.src = 'https://cdn.jsdelivr.net/npm/fuse.js/dist/fuse.min.js';
-        fuseScript.onload = () => {
-            this.setupFormHandling();
-        };
-        document.head.appendChild(fuseScript);
-    },
-
-    handlePageVisit: function () {
+    handlePageVisit: function() {
         this.handleEvent('pageview');
-    },
-
-    handleFormSubmit: function(event) {
-        event.preventDefault(); // Prevent the default form submission
-        this.handleEvent('form_submission');
     },
 
     handleEvent: function(type) {
@@ -74,134 +83,6 @@ var CRM = {
         }
     },
 
-    handleTelecomLinkClick: async function(e) {
-        const link = e.target.closest('a');
-        if (!link) { return; }
-        const hrefType = link.href.startsWith('tel:') ? 'tel' : link.href.startsWith('sms:') ? 'sms' : null;
-        if (!hrefType) { return; }
-        const postUrl = 'https://api.threadcommunication.com/api/v1/tracking';
-        const sessionData = sessionStorage.getItem('sessionTrackingData');
-        const trackingData = sessionData ? JSON.parse(sessionData).trackingParams : {};
-        const { referrerSource, source: utmSource, campaign } = trackingData;
-        const params = {
-            phoneNumber: link.href.replace(/^tel:|^sms:/, ''),
-            time: new Date().toISOString(),
-            website: window.location.href,
-            referrer_source: referrerSource,
-            utm_source: utmSource,
-            campaign_name: campaign,
-            href_type: hrefType
-        };
-        try {
-            const response = await fetch(postUrl, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                body: new URLSearchParams(params).toString()
-            });
-            const data = await response.json();
-            console.log('Success:', data);
-        } catch (error) {
-            console.error('Error:', error);
-        }
-    },
-
-    setupFormHandling: function() {
-        const forms = document.querySelectorAll('form');
-        forms.forEach((form) => {
-            form.addEventListener('submit', this.handleFormSubmit.bind(this));
-            form.addEventListener('submit', this.processAndSubmitForm.bind(this));
-        });
-    },
-
-    processAndSubmitForm: async function(event) {
-        event.preventDefault(); // Prevent the default form submission
-
-        const form = event.target;
-        const formData = new FormData(form);
-
-        // Create an array from formData keys and values, mapping keys to cleaned form labels
-        const formDataArray = Array.from(formData.entries()).map(([key, value]) => {
-            const field = form.querySelector(`[name="${key}"]`);
-            const label = form.querySelector(`label[for="${field.id}"]`);
-            let labelText = label ? label.textContent.trim() : key; // Use label text or key as fallback
-            labelText = labelText.replace(/[^a-zA-Z\s]/g, ''); // Remove non-alphabetic characters
-            labelText = labelText.replace(/\s+/g, ' ').trim(); // Normalize white spaces and trim
-            return { key: labelText, value };
-        });
-
-        // Define options for Fuse.js
-        const options = {
-            includeScore: true,
-            keys: ['key'] // Use 'key' because we are now using label text as key in formDataArray
-        };
-
-        // Create a Fuse instance
-        const fuse = new Fuse(formDataArray, options);
-
-        // Define a function to search and get data by fuzzy key name
-        function getFuzzyData(searchKey) {
-            const result = fuse.search(searchKey);
-            return result.length ? result[0].item.value : null;
-        }
-
-        // Use getFuzzyData to fetch form data by fuzzy searching keys
-        const firstName = getFuzzyData('Name');
-        const lastName = getFuzzyData('Last');
-        const email = getFuzzyData('Email');
-        const phone = getFuzzyData('Phone');
-
-        let trackingData;
-        this.transferSessionToLocalStorage();
-        var trackingHistory = localStorage.getItem('trackingHistory');
-        if (trackingHistory) {
-            var trackingHistory = JSON.parse(trackingHistory);
-            var firstKey = Object.keys(trackingHistory)[0];
-            var firstElement = trackingHistory[firstKey];
-        }
-
-        if (firstElement) {
-            trackingData = firstElement.sessionData.trackingParams;
-        } else {
-            trackingData = {
-                referrerSource: null,
-                source: null,
-                campaign: null
-            };
-        }
-
-        const { referrerSource, source: utmSource, campaign } = trackingData;
-
-        const baseUrl = 'https://api.threadcommunication.com';
-        const token = this.token || 'default_key_if_not_provided'; // Use the token from the CRM object
-        console.log(firstName, lastName, email, phone, referrerSource, utmSource, campaign);
-        try {
-            const response = await fetch(`${baseUrl}/api/v1/website_leads`, {
-                method: 'POST',
-                headers: {
-                    'Authorization': token, // Use the passed authorization key
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    first_name: firstName,
-                    last_name: lastName,
-                    email: email,
-                    phone: phone,
-                    referrer_source: referrerSource,
-                    utm_source: utmSource,
-                    campaign_name: campaign
-                })
-            });
-
-            const responseData = await response.json();
-            if (responseData.message) {
-                console.warn(responseData.message);
-            }
-            console.log("Success:", responseData);
-        } catch (error) {
-            console.error('New Lead not created in RG CRM.', error);
-        }
-    },
-
     collectInitialPageVisitData: function() {
         var url = document.referrer;
         var source = url ? new URL(url).hostname.split('.').slice(-2, -1)[0] : 'Direct or no-referrer';
@@ -219,5 +100,124 @@ var CRM = {
             referrerSource: source,
             timestamp: timestamp,
         };
+    },
+
+    getTrackingData: function() {
+        const trackingHistory = JSON.parse(localStorage.getItem('trackingHistory') || '{}');
+        const sessionHistory = JSON.parse(sessionStorage.getItem('sessionTrackingData') || '{}');
+        return { ...trackingHistory, ...sessionHistory };
+    }
+};
+
+// Module for handling telecom links (click-to-call, SMS)
+var TelecomModule = {
+    init: function() {
+        document.body.addEventListener('click', this.handleTelecomLinkClick.bind(this));
+    },
+
+    handleTelecomLinkClick: async function(e) {
+        const link = e.target.closest('a');
+        if (!link) { return; }
+        const hrefType = link.href.startsWith('tel:') ? 'tel' : link.href.startsWith('sms:') ? 'sms' : null;
+        if (!hrefType) { return; }
+        
+        const trackingHistory = TrackingModule.getTrackingData();
+        const params = {
+            phone: link.href.replace(/^tel:|^sms:/, ''),
+            trackingHistory: trackingHistory,
+            href_type: hrefType,
+            website: window.location.href
+        };
+        
+        try {
+            await APIModule.post('/api/v1/telecom_clicks', params);
+        } catch (error) {
+            console.error('Failed to log telecom click:', error);
+        }
+    }
+};
+
+// Module for form handling and submission
+var FormModule = {
+    init: function() {
+        this.loadFuseJSAndSetupForms();
+    },
+
+    loadFuseJSAndSetupForms: function() {
+        const script = document.createElement('script');
+        script.src = 'https://cdn.jsdelivr.net/npm/fuse.js/dist/fuse.min.js';
+        script.onload = () => this.setupFormHandling();
+        document.head.appendChild(script);
+    },
+
+    setupFormHandling: function() {
+        document.querySelectorAll('form').forEach(form => {
+            form.addEventListener('submit', this.handleFormSubmit.bind(this));
+        });
+    },
+
+    handleFormSubmit: function(event) {
+        event.preventDefault();
+        TrackingModule.handleEvent('form_submission');
+        this.processAndSubmitForm(event.target);
+    },
+
+    processAndSubmitForm: async function(form) {
+        const formData = this.getFormDataArray(form);
+        const fuzzyMatcher = this.createFuzzyMatcher(formData);
+        const leadData = this.extractLeadData(fuzzyMatcher);
+        const trackingHistory = TrackingModule.getTrackingData();
+        const params = { ...leadData, trackingHistory: trackingHistory };
+
+        try {
+            await APIModule.post('/api/v1/website_leads', params);
+        } catch (error) {
+            console.error('New Lead not created in RG CRM.', error);
+        }
+    },
+
+    getFormDataArray: function(form) {
+        const formData = new FormData(form);
+        return Array.from(formData.entries()).map(([key, value]) => {
+            const field = form.querySelector(`[name="${key}"]`);
+            const label = form.querySelector(`label[for="${field.id}"]`);
+            let labelText = label ? label.textContent.trim() : key;
+            labelText = this.cleanLabelText(labelText);
+            return { key: labelText, value };
+        });
+    },
+
+    cleanLabelText: function(text) {
+        return text.replace(/[^a-zA-Z\s]/g, '')  // Remove non-alphabetic characters
+                   .replace(/\s+/g, ' ')         // Normalize white spaces
+                   .trim();                      // Trim leading/trailing spaces
+    },
+
+    createFuzzyMatcher: function(formDataArray) {
+        const options = { includeScore: true, keys: ['key'] };
+        const fuse = new Fuse(formDataArray, options);
+        return searchKey => {
+            const result = fuse.search(searchKey);
+            return result.length ? result[0].item.value : null;
+        };
+    },
+
+    extractLeadData: function(getFuzzyData) {
+        return {
+            first_name: getFuzzyData('Name'),
+            last_name: getFuzzyData('Last'),
+            email: getFuzzyData('Email'),
+            phone: getFuzzyData('Phone')
+        };
+    }
+};
+
+// Main CRM object
+var CRM = {
+    init: function(config) {
+        APIModule.init(config.token);
+        TrackingModule.init();
+        TelecomModule.init();
+        FormModule.init();
     }
 };

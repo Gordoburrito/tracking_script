@@ -25,3 +25,7 @@ To use the tracking script, include it in your HTML file:
 
 ## Additional Information
 For more information on how to use jsDelivr to load GitHub releases, commits, or branches, visit [jsDelivr Documentation](https://www.jsdelivr.com/?docs=gh).
+
+### My update didn't go through!! 😤
+is your tag EXACTLY vX.X.X ? 
+you can always purge the cache by 
