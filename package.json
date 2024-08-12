@@ -1,0 +1,26 @@
+{
+  "name": "crm-modules",
+  "version": "1.0.0",
+  "description": "CRM modules for tracking, telecom, and form handling",
+  "main": "script.js",
+  "scripts": {
+    "test": "vitest",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage"
+  },
+  "keywords": [
+    "crm",
+    "tracking",
+    "telecom",
+    "form"
+  ],
+  "author": "Trip Plapper",
+  "license": "ISC",
+  "devDependencies": {
+    "vitest": "^0.34.6",
+    "@vitest/coverage-v8": "^0.34.6"
+  },
+  "dependencies": {
+    "fuse.js": "^6.6.2"
+  }
+}

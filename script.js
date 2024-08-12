@@ -45,9 +45,7 @@ var TrackingModule = {
         this.handleEvent('pageview');
     },
 
-    handleEvent: function(type) {
-        console.log('handleEvent', type);
-        console.log("initial sessionTrackingData", sessionStorage.getItem('sessionTrackingData'));
+    handleEvent: function (type) {
         try {
             var existingSessionData = JSON.parse(sessionStorage.getItem('sessionTrackingData')) || { sessionId: new Date().toISOString(), trackingParams: this.collectInitialPageVisitData(), events: {} };
             var timestamp = new Date().toISOString();
@@ -56,7 +54,6 @@ var TrackingModule = {
                 date: timestamp,
             };
             sessionStorage.setItem('sessionTrackingData', JSON.stringify(existingSessionData));
-            console.log('sessionTrackingData', sessionStorage.getItem('sessionTrackingData'));
         } catch (error) {
             console.error('Failed to handle event:', error);
         }
@@ -104,8 +101,11 @@ var TrackingModule = {
 
     getTrackingData: function() {
         const trackingHistory = JSON.parse(localStorage.getItem('trackingHistory') || '{}');
-        const sessionHistory = JSON.parse(sessionStorage.getItem('sessionTrackingData') || '{}');
-        return { ...trackingHistory, ...sessionHistory };
+        const sessionHistory = JSON.parse(sessionStorage.getItem('sessionTrackingData'));
+        if (sessionHistory) {
+            trackingHistory[sessionHistory.sessionId] = sessionHistory;
+        }
+        return trackingHistory;
     }
 };
 
@@ -221,3 +221,5 @@ var CRM = {
         FormModule.init();
     }
 };
+
+export { APIModule, TrackingModule, TelecomModule, FormModule, CRM }
