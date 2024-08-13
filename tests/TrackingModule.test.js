@@ -7,6 +7,9 @@ describe('TrackingModule', () => {
     localStorage.clear()
     sessionStorage.clear()
   })
+  afterEach(() => {
+    vi.restoreAllMocks()
+  })
   
   it('TrackingModule should handle a page visit', () => {
     TrackingModule.handlePageVisit()
@@ -52,7 +55,43 @@ describe('TrackingModule', () => {
 
     expect(Object.keys(trackingData)).toHaveLength(2)
   })
-  it.todo('should correctly set up event listeners')
-  it.todo('should handle different types of events')
-  it.todo('should collect initial page visit data correctly')
+
+  it('should correctly set up beforeunload event listeners', () => {
+    vi.spyOn(window, 'addEventListener')
+    TrackingModule.init()
+    expect(window.addEventListener).toHaveBeenCalledWith(
+      'beforeunload',
+      TrackingModule.transferSessionToLocalStorage
+    )
+  })
+
+  it('should handle different types of events', () => {
+    vi.spyOn(TrackingModule, 'handleEvent')
+    TrackingModule.handleEvent('click')
+    expect(TrackingModule.handleEvent).toHaveBeenCalledWith('click')
+    const sessionData = JSON.parse(sessionStorage.getItem('sessionTrackingData'))
+    
+    const eventKeys = Object.keys(sessionData.events)
+    expect(eventKeys).toHaveLength(1)
+    const eventKey = eventKeys[0]
+    const eventData = sessionData.events[eventKey]
+    expect(eventData.type).toBe('click')
+  })
+
+  it('should collect initial page visit data correctly', () => {
+    Object.defineProperty(window, 'location', {
+      value: {
+        search: '?utm_source=test1&utm_medium=test2&utm_campaign=test3&utm_content=test4&utm_term=test5'
+      }
+    });
+    TrackingModule.handlePageVisit();
+    const sessionDataString = sessionStorage.getItem('sessionTrackingData');
+    const sessionData = JSON.parse(sessionDataString);
+
+    expect(sessionData.trackingParams.source).toBe('test1');
+    expect(sessionData.trackingParams.medium).toBe('test2');
+    expect(sessionData.trackingParams.campaign).toBe('test3');
+    expect(sessionData.trackingParams.content).toBe('test4');
+    expect(sessionData.trackingParams.term).toBe('test5');
+  })
 })
