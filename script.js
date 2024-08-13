@@ -67,7 +67,7 @@ var TrackingModule = {
                 if (!existingLocalData || Array.isArray(existingLocalData)) {
                     existingLocalData = {}
                 }
-                existingLocalData[sessionData.sessionId] = { sessionData, sessionStart: sessionData.trackingParams.timestamp, sessionEnd: new Date().toISOString() }
+                existingLocalData[sessionData.sessionId] = this.createSessionEntry(sessionData);
                 localStorage.setItem(
                     'trackingHistory',
                     JSON.stringify(existingLocalData)
@@ -78,6 +78,14 @@ var TrackingModule = {
         catch (error) {
             console.error('Failed to transfer session data:', error)
         }
+    },
+
+    createSessionEntry: function(sessionData) {
+        return {
+            sessionData: sessionData,
+            sessionStart: sessionData.trackingParams.timestamp,
+            sessionEnd: new Date().toISOString()
+        };
     },
 
     collectInitialPageVisitData: function() {
@@ -103,7 +111,7 @@ var TrackingModule = {
         const trackingHistory = JSON.parse(localStorage.getItem('trackingHistory') || '{}');
         const sessionHistory = JSON.parse(sessionStorage.getItem('sessionTrackingData'));
         if (sessionHistory) {
-            trackingHistory[sessionHistory.sessionId] = sessionHistory;
+            trackingHistory[sessionHistory.sessionId] = this.createSessionEntry(sessionHistory);
         }
         return trackingHistory;
     }

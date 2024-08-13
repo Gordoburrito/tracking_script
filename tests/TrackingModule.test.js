@@ -44,16 +44,38 @@ describe('TrackingModule', () => {
     expect(sessionData.sessionEnd).toMatch(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/)
   })
 
-  it('getTrackingData should return the tracking data from local storage and session storage', async () => {
+  it('getTrackingData should return correctly structured data from local storage and session storage', async () => {
     TrackingModule.handlePageVisit()
     TrackingModule.transferSessionToLocalStorage()
-    // sessionData uses keys of the datetime so it will overwrite the trackingHistory if it happened at the same time
+    // Wait to ensure different timestamps
     await new Promise(resolve => setTimeout(resolve, 1))
     TrackingModule.handlePageVisit()
 
     const trackingData = TrackingModule.getTrackingData()
 
     expect(Object.keys(trackingData)).toHaveLength(2)
+
+    const [localStorageSession, sessionStorageSession] = Object.values(trackingData)
+
+    // Function to check session structure
+    const checkSessionStructure = (session) => {
+      expect(session).toHaveProperty('sessionData')
+      expect(session).toHaveProperty('sessionStart')
+      expect(session).toHaveProperty('sessionEnd')
+      expect(session.sessionData).toHaveProperty('sessionId')
+      expect(session.sessionData).toHaveProperty('trackingParams')
+      expect(session.sessionData).toHaveProperty('events')
+      expect(session.sessionStart).toMatch(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/)
+      expect(session.sessionEnd).toMatch(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/)
+    }
+
+    // Check structure for both sessions
+    checkSessionStructure(localStorageSession)
+    checkSessionStructure(sessionStorageSession)
+
+    // Compare structures
+    expect(Object.keys(localStorageSession)).toEqual(Object.keys(sessionStorageSession))
+    expect(Object.keys(localStorageSession.sessionData)).toEqual(Object.keys(sessionStorageSession.sessionData))
   })
 
   it('should correctly set up beforeunload event listeners', () => {
