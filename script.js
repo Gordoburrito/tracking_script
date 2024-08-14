@@ -118,6 +118,7 @@ var TrackingModule = {
 };
 
 // Module for handling telecom links (click-to-call, SMS)
+// TODO: refactor to make this use the headers and use the practice instead of the website
 var TelecomModule = {
     init: function() {
         document.body.addEventListener('click', this.handleTelecomLinkClick.bind(this));

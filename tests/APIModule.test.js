@@ -1,20 +1,62 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { APIModule } from '../script.js'
 
-// Mock fetch
+// Mock fetch and console methods
 global.fetch = vi.fn()
+console.warn = vi.fn()
+console.log = vi.fn()
+console.error = vi.fn()
 
 describe('APIModule', () => {
   beforeEach(() => {
     vi.resetAllMocks()
+    APIModule.init('test_token')
   })
 
   it('should initialize with a token', () => {
-    APIModule.init('test_token')
     expect(APIModule.token).toBe('test_token')
   })
 
-  it.todo('should make a successful POST request')
-  it.todo('should handle errors in POST request')
-  it.todo('should log warnings when response contains a message')
+  it('should make a successful POST request', async () => {
+    const mockResponse = { data: 'success' }
+    global.fetch.mockResolvedValueOnce({
+      json: () => Promise.resolve(mockResponse)
+    })
+
+    const result = await APIModule.post('/test', { key: 'value' })
+
+    expect(global.fetch).toHaveBeenCalledWith(
+      'https://api.threadcommunication.com/test',
+      {
+        method: 'POST',
+        headers: {
+          'Authorization': 'test_token',
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ key: 'value' })
+      }
+    )
+    expect(result).toEqual(mockResponse)
+    expect(console.log).toHaveBeenCalledWith('Success:', mockResponse)
+  })
+
+  it('should handle errors in POST request', async () => {
+    const mockError = new Error('Network error')
+    global.fetch.mockRejectedValueOnce(mockError)
+
+    await expect(APIModule.post('/test', { key: 'value' })).rejects.toThrow('Network error')
+    expect(console.error).toHaveBeenCalledWith('Error:', mockError)
+  })
+
+  it('should log warnings when response contains a message', async () => {
+    const mockResponse = { message: 'Warning message', data: 'success' }
+    global.fetch.mockResolvedValueOnce({
+      json: () => Promise.resolve(mockResponse)
+    })
+
+    await APIModule.post('/test', { key: 'value' })
+
+    expect(console.warn).toHaveBeenCalledWith('Warning message')
+    expect(console.log).toHaveBeenCalledWith('Success:', mockResponse)
+  })
 })
