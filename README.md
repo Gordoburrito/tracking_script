@@ -28,4 +28,5 @@ For more information on how to use jsDelivr to load GitHub releases, commits, or
 
 ### My update didn't go through!! 😤
 is your tag EXACTLY vX.X.X ? 
-you can always purge the cache by 
+you can always purge the cache by visiting the url 
+`https://purge.jsdelivr.net/gh/roostergrin/crm_frontend_integration/script.js` 
