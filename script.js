@@ -150,6 +150,7 @@ var TelecomModule = {
 var FormModule = {
     init: function() {
         this.loadFuseJSAndSetupForms();
+        this.setupMutationObserver();
     },
 
     loadFuseJSAndSetupForms: function() {
@@ -159,9 +160,29 @@ var FormModule = {
         document.head.appendChild(script);
     },
 
+    setupMutationObserver: function() {
+        const observer = new MutationObserver(this.debounce(this.setupFormHandling.bind(this), 300));
+        observer.observe(document.body, { childList: true, subtree: true });
+    },
+
+    debounce: function(func, wait) {
+        let timeout;
+        return function executedFunction(...args) {
+            const later = () => {
+                clearTimeout(timeout);
+                func(...args);
+            };
+            clearTimeout(timeout);
+            timeout = setTimeout(later, wait);
+        };
+    },
+
     setupFormHandling: function() {
         document.querySelectorAll('form').forEach(form => {
-            form.addEventListener('submit', this.handleFormSubmit.bind(this));
+            if (!form.hasAttribute('data-form-module-initialized')) {
+                form.addEventListener('submit', this.handleFormSubmit.bind(this));
+                form.setAttribute('data-form-module-initialized', 'true');
+            }
         });
     },
 

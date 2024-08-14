@@ -43,6 +43,7 @@ describe('FormModule', () => {
     expect(FormModule).toBeDefined()
   })
 
+  // delete this if it breaks
   it('should load FuseJS and set up form handling', () => {
     FormModule.init()
     
