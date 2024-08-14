@@ -231,4 +231,7 @@ var CRM = {
     }
 };
 
+// Make TrackingModule globally accessible
+window.TrackingModule = TrackingModule;
+
 export { APIModule, TrackingModule, TelecomModule, FormModule, CRM }
