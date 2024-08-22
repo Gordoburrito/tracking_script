@@ -133,13 +133,13 @@ var TelecomModule = {
         const trackingHistory = TrackingModule.getTrackingData();
         const params = {
             phone: link.href.replace(/^tel:|^sms:/, ''),
-            trackingHistory: trackingHistory,
+            tracking_history: trackingHistory,
             href_type: hrefType,
             website: window.location.href
         };
         
         try {
-            await APIModule.post('/api/v1/telecom_clicks', params);
+            await APIModule.post('/api/v1/telecom_click', params);
         } catch (error) {
             console.error('Failed to log telecom click:', error);
         }
@@ -197,6 +197,7 @@ var FormModule = {
         const fuzzyMatcher = this.createFuzzyMatcher(formData);
         const leadData = this.extractLeadData(fuzzyMatcher);
         const trackingHistory = TrackingModule.getTrackingData();
+        
         const params = { ...leadData, trackingHistory: trackingHistory };
 
         try {
@@ -255,4 +256,7 @@ var CRM = {
 // Make TrackingModule globally accessible
 window.TrackingModule = TrackingModule;
 
-export { APIModule, TrackingModule, TelecomModule, FormModule, CRM }
+// Conditional export for testing environments
+if (typeof module !== 'undefined' && module.exports) {
+    module.exports = { APIModule, TrackingModule, TelecomModule, FormModule, CRM };
+}
