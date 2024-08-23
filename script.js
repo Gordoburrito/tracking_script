@@ -38,7 +38,7 @@ var TrackingModule = {
     },
 
     setupEventListeners: function() {
-        window.addEventListener('beforeunload', this.transferSessionToLocalStorage);
+        window.addEventListener('beforeunload', this.transferSessionToLocalStorage.bind(this));
     },
 
     handlePageVisit: function() {
@@ -121,6 +121,16 @@ var TrackingModule = {
 // TODO: refactor to make this use the headers and use the practice instead of the website
 var TelecomModule = {
     init: function() {
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', () => {
+                this.addEventListeners();
+            });
+        } else {
+            this.addEventListeners();
+        }
+    },
+
+    addEventListeners: function() {
         document.body.addEventListener('click', this.handleTelecomLinkClick.bind(this));
     },
 
@@ -234,9 +244,19 @@ var FormModule = {
     },
 
     extractLeadData: function(getFuzzyData) {
+        const fullName = getFuzzyData('Name') || getFuzzyData('Full Name');
+        let firstName = getFuzzyData('First Name');
+        let lastName = getFuzzyData('Last Name');
+
+        if (fullName && (!firstName || !lastName)) {
+            const nameParts = fullName.trim().split(/\s+/);
+            firstName = firstName || nameParts[0];
+            lastName = lastName || (nameParts.length > 1 ? nameParts.slice(1).join(' ') : '');
+        }
+
         return {
-            first_name: getFuzzyData('Name'),
-            last_name: getFuzzyData('Last'),
+            first_name: firstName || '',
+            last_name: lastName || '',
             email: getFuzzyData('Email'),
             phone: getFuzzyData('Phone')
         };
@@ -246,10 +266,21 @@ var FormModule = {
 // Main CRM object
 var CRM = {
     init: function(config) {
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', () => {
+                this.initializeModules(config);
+            });
+        } else {
+            this.initializeModules(config);
+        }
+    },
+
+    initializeModules: function(config) {
         APIModule.init(config.token);
         TrackingModule.init();
         TelecomModule.init();
         FormModule.init();
+        console.log('CRM modules initialized');
     }
 };
 

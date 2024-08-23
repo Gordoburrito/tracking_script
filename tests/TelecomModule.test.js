@@ -36,9 +36,9 @@ describe('TelecomModule', () => {
     telLink.click();
 
     // Assert that APIModule.post was called with the correct parameters
-    expect(mockPost).toHaveBeenCalledWith('/api/v1/telecom_clicks', {
+    expect(mockPost).toHaveBeenCalledWith('/api/v1/telecom_click', {
       phone: '+1234567890',
-      trackingHistory: mockTrackingData,
+      tracking_history: mockTrackingData,
       href_type: 'tel',
       website: window.location.href
     });
@@ -62,9 +62,9 @@ describe('TelecomModule', () => {
 
     smsLink.click();
 
-    expect(mockPost).toHaveBeenCalledWith('/api/v1/telecom_clicks', {
+    expect(mockPost).toHaveBeenCalledWith('/api/v1/telecom_click', {
       phone: '+1234567890',
-      trackingHistory: mockTrackingData,
+      tracking_history: mockTrackingData,
       href_type: 'sms',
       website: window.location.href
     });
@@ -123,9 +123,9 @@ describe('TelecomModule', () => {
     await telLink.click();
 
     // Assert that APIModule.post was called with the correct parameters
-    expect(mockPost).toHaveBeenCalledWith('/api/v1/telecom_clicks', {
+    expect(mockPost).toHaveBeenCalledWith('/api/v1/telecom_click', {
       phone: '+1234567890',
-      trackingHistory: mockTrackingData,
+      tracking_history: mockTrackingData,
       href_type: 'tel',
       website: 'https://example.com/test-page'
     });
