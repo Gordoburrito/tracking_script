@@ -245,8 +245,8 @@ var FormModule = {
 
     extractLeadData: function(getFuzzyData) {
         const fullName = getFuzzyData('Name') || getFuzzyData('Full Name');
-        let firstName = getFuzzyData('First Name');
-        let lastName = getFuzzyData('Last Name');
+        let firstName = getFuzzyData('First');
+        let lastName = getFuzzyData('Last');
 
         if (fullName && (!firstName || !lastName)) {
             const nameParts = fullName.trim().split(/\s+/);
