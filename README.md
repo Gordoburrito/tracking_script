@@ -1,4 +1,4 @@
-# Tracking Script for TW Ortho
+# Tracking Script for the CRM
 
 This repository contains a tracking script designed for TW Ortho's website, specifically for the [Request Appointment](https://www.twortho.com/contact-us/request-appointment/) page. The script collects and handles various tracking parameters and events to help analyze user interactions.
 
