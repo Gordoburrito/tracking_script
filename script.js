@@ -208,7 +208,7 @@ var FormModule = {
         const leadData = this.extractLeadData(fuzzyMatcher);
         const trackingHistory = TrackingModule.getTrackingData();
         
-        const params = { ...leadData, trackingHistory: trackingHistory };
+        const params = { ...leadData, tracking_history: trackingHistory };
 
         try {
             await APIModule.post('/api/v1/website_leads', params);
