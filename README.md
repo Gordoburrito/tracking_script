@@ -30,3 +30,25 @@ For more information on how to use jsDelivr to load GitHub releases, commits, or
 is your tag EXACTLY vX.X.X ? 
 you can always purge the cache by visiting the url 
 `https://purge.jsdelivr.net/gh/roostergrin/crm_frontend_integration/script.js` 
+
+
+### Nuxt
+```
+    script: [
+      {
+        src: 'https://cdn.jsdelivr.net/gh/roostergrin/crm_frontend_integration@latest/script.js'
+      },
+      {
+        hid: 'crm-init',
+        innerHTML: `
+          CRM.init({
+              token: "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJvcmlnaW4iOiJodHRwczovL2NybS10aHJlYWQucm9vc3RlcmdyaW50ZW1wbGF0ZXMuY29tLyIsInByYWN0aWNlX2lkIjoiMzU1In0.aUzwgQdETpNeY42CoQNYNSTiVJ23zKIL2I1e6bDRNqI"
+          });
+        `,
+        type: 'text/javascript'
+      }
+    ],
+    __dangerouslyDisableSanitizersByTagID: {
+      'crm-init': ['innerHTML']
+    }
+```
