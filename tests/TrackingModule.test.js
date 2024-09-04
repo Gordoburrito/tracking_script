@@ -114,4 +114,18 @@ describe('TrackingModule', () => {
     expect(sessionData.trackingParams.content).toBe('test4');
     expect(sessionData.trackingParams.term).toBe('test5');
   })
+
+  it('should collect partial UTM parameters correctly', () => {
+    Object.defineProperty(window, 'location', {
+      value: {
+        search: '?utm_campaign=21131269577&utm_source=google_ads'
+      }
+    });
+    TrackingModule.handlePageVisit();
+    const sessionDataString = sessionStorage.getItem('sessionTrackingData');
+    const sessionData = JSON.parse(sessionDataString);
+
+    expect(sessionData.trackingParams.campaign).toBe('21131269577');
+    expect(sessionData.trackingParams.source).toBe('google_ads');
+  })
 })

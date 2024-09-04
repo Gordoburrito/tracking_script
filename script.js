@@ -235,30 +235,63 @@ var FormModule = {
     },
 
     createFuzzyMatcher: function(formDataArray) {
-        const options = { includeScore: true, keys: ['key'] };
+        const options = {
+            includeScore: true,
+            keys: ['key'],
+            threshold: 0.4, // Adjust this value to fine-tune matching sensitivity
+        };
         const fuse = new Fuse(formDataArray, options);
-        return searchKey => {
-            const result = fuse.search(searchKey);
-            return result.length ? result[0].item.value : null;
+
+        return function(searchKey) {
+            const results = fuse.search(searchKey);
+            if (results.length === 0) return null;
+
+            // Define keywords that are likely to be associated with phone numbers
+            const phoneKeywords = ['phone', 'mobile', 'cell', 'telephone', 'contact'];
+            // Define keywords that are unlikely to be phone numbers
+            const nonPhoneKeywords = ['recaptcha', 'captcha', 'token', 'response', 'email', 'name'];
+
+            // Sort results based on keyword matching and Fuse.js score
+            results.sort((a, b) => {
+                const aKey = a.item.key.toLowerCase();
+                const bKey = b.item.key.toLowerCase();
+
+                const aIsPhone = phoneKeywords.some(keyword => aKey.includes(keyword));
+                const bIsPhone = phoneKeywords.some(keyword => bKey.includes(keyword));
+                const aIsNonPhone = nonPhoneKeywords.some(keyword => aKey.includes(keyword));
+                const bIsNonPhone = nonPhoneKeywords.some(keyword => bKey.includes(keyword));
+
+                if (aIsPhone && !bIsPhone) return -1;
+                if (!aIsPhone && bIsPhone) return 1;
+                if (aIsNonPhone && !bIsNonPhone) return 1;
+                if (!aIsNonPhone && bIsNonPhone) return -1;
+
+                return a.score - b.score;
+            });
+
+            return results[0].item.value;
         };
     },
 
     extractLeadData: function(getFuzzyData) {
         const fullName = getFuzzyData('Name') || getFuzzyData('Full Name');
-        let firstName = getFuzzyData('First');
-        let lastName = getFuzzyData('Last');
+        let firstName = getFuzzyData('First Name');
+        let lastName = getFuzzyData('Last Name') || getFuzzyData('Last');
 
-        if (fullName && (!firstName || !lastName)) {
+        if (fullName) {
             const nameParts = fullName.trim().split(/\s+/);
             firstName = firstName || nameParts[0];
             lastName = lastName || (nameParts.length > 1 ? nameParts.slice(1).join(' ') : '');
         }
 
+        const phoneFields = ['yourtel', 'Phone', 'Mobile', 'Cell', 'Telephone', 'Contact Number'];
+        const phone = phoneFields.reduce((result, field) => result || getFuzzyData(field), null);
+
         return {
             first_name: firstName || '',
             last_name: lastName || '',
             email: getFuzzyData('Email'),
-            phone: getFuzzyData('Phone')
+            phone: phone || ''
         };
     }
 };
