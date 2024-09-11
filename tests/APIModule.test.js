@@ -13,20 +13,29 @@ describe('APIModule', () => {
     APIModule.init('test_token')
   })
 
-  it('should initialize with a token', () => {
-    expect(APIModule.token).toBe('test_token')
-  })
+  it('should use default baseUrl if not provided', () => {
+    APIModule.init({ token: 'test_token' });
+    expect(APIModule.baseUrl).toBe('https://api.threadcommunication.com');
+  });
+  
+  it('should initialize with options', () => {
+    const options = { token: 'test_token', baseUrl: 'https://test-api.example.com' };
+    APIModule.init(options);
+    expect(APIModule.token).toBe('test_token');
+    expect(APIModule.baseUrl).toBe('https://test-api.example.com');
+  });
 
   it('should make a successful POST request', async () => {
-    const mockResponse = { data: 'success' }
+    const mockResponse = { data: 'success' };
     global.fetch.mockResolvedValueOnce({
       json: () => Promise.resolve(mockResponse)
-    })
+    });
 
-    const result = await APIModule.post('/test', { key: 'value' })
+    APIModule.init({ token: 'test_token', baseUrl: 'https://test-api.example.com' });
+    const result = await APIModule.post('/test', { key: 'value' });
 
     expect(global.fetch).toHaveBeenCalledWith(
-      'https://api.threadcommunication.com/test',
+      'https://test-api.example.com/test',
       {
         method: 'POST',
         headers: {
@@ -35,10 +44,10 @@ describe('APIModule', () => {
         },
         body: JSON.stringify({ key: 'value' })
       }
-    )
-    expect(result).toEqual(mockResponse)
-    expect(console.log).toHaveBeenCalledWith('Success:', mockResponse)
-  })
+    );
+    expect(result).toEqual(mockResponse);
+    expect(console.log).toHaveBeenCalledWith('Success:', mockResponse);
+  });
 
   it('should handle errors in POST request', async () => {
     const mockError = new Error('Network error')
@@ -46,7 +55,7 @@ describe('APIModule', () => {
 
     await expect(APIModule.post('/test', { key: 'value' })).rejects.toThrow('Network error')
     expect(console.error).toHaveBeenCalledWith('Error:', mockError)
-  })
+  });
 
   it('should log warnings when response contains a message', async () => {
     const mockResponse = { message: 'Warning message', data: 'success' }

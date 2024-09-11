@@ -22,6 +22,32 @@ To use the tracking script, include it in your HTML file:
     });
 </script>
 ```
+To use in staging or locally 
+
+<!-- For production -->
+<script>
+CRM.init({
+    token: 'your_production_token_here',
+    baseUrl: 'https://api.threadcommunication.com'
+});
+</script>
+
+<!-- For staging -->
+<script>
+CRM.init({
+    token: 'your_staging_token_here',
+    baseUrl: 'https://staging-api.threadcommunication.com'
+});
+</script>
+
+<!-- For local development -->
+<script>
+CRM.init({
+    token: 'your_dev_token_here',
+    baseUrl: 'http://localhost:3000'
+});
+</script>
+
 
 ## Additional Information
 For more information on how to use jsDelivr to load GitHub releases, commits, or branches, visit [jsDelivr Documentation](https://www.jsdelivr.com/?docs=gh).

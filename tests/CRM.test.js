@@ -12,14 +12,14 @@ describe('CRM', () => {
   it('should initialize all modules correctly', () => {
     const mockConfig = { token: 'test-token' }
     CRM.init(mockConfig)
-    expect(APIModule.init).toHaveBeenCalledWith('test-token')
+    expect(APIModule.init).toHaveBeenCalledWith(mockConfig)
     expect(FormModule.init).toHaveBeenCalled()
     expect(TelecomModule.init).toHaveBeenCalled()
   })
 
-  it('should pass the correct token to APIModule', () => {
+  it('should pass the correct config to APIModule', () => {
     const mockConfig = { token: 'test-token' }
     CRM.init(mockConfig)
-    expect(APIModule.init).toHaveBeenCalledWith('test-token')
+    expect(APIModule.init).toHaveBeenCalledWith(mockConfig)
   })
 })

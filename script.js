@@ -3,8 +3,9 @@ var APIModule = {
     baseUrl: 'https://api.threadcommunication.com',
     token: "unspecified_token!",
 
-    init: function(token) {
-        this.token = token;
+    init: function(options) {
+        this.token = options.token;
+        this.baseUrl = options.baseUrl || this.baseUrl;
     },
 
     post: async function(endpoint, data) {
@@ -309,7 +310,7 @@ var CRM = {
     },
 
     initializeModules: function(config) {
-        APIModule.init(config.token);
+        APIModule.init(config);
         TrackingModule.init();
         TelecomModule.init();
         FormModule.init();
