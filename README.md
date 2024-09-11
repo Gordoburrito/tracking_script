@@ -24,6 +24,7 @@ To use the tracking script, include it in your HTML file:
 ```
 To use in staging or locally 
 
+```html
 <!-- For production -->
 <script>
 CRM.init({
@@ -47,6 +48,7 @@ CRM.init({
     baseUrl: 'http://localhost:3000'
 });
 </script>
+```
 
 
 ## Additional Information
