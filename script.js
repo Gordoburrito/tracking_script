@@ -223,7 +223,11 @@ var FormModule = {
         return Array.from(formData.entries()).map(([key, value]) => {
             const field = form.querySelector(`[name="${key}"]`);
             const label = form.querySelector(`label[for="${field.id}"]`);
-            let labelText = label ? label.textContent.trim() : key;
+            let labelText = label ? label.textContent.trim() : '';
+            if (!labelText && field.placeholder) {
+                labelText = field.placeholder.trim();
+            }
+            labelText = labelText || key;
             labelText = this.cleanLabelText(labelText);
             return { key: labelText, value };
         });
