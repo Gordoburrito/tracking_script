@@ -37,7 +37,7 @@ CRM.init({
 <script>
 CRM.init({
     token: 'your_staging_token_here',
-    baseUrl: 'https://staging-api.threadcommunication.com'
+    baseUrl: 'https://staging.api.threadcommunication.com'
 });
 </script>
 
