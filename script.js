@@ -6,6 +6,30 @@ var APIModule = {
     init: function(options) {
         this.token = options.token;
         this.baseUrl = options.baseUrl || this.baseUrl;
+        this.verifyToken();
+    },
+
+    verifyToken: async function() {
+        try {
+            const today = new Date().toISOString().split('T')[0]; // Get today's date in YYYY-MM-DD format
+            const response = await fetch(`${this.baseUrl}/api/v1/bookings?start=${today}&end=${today}&consumer=widget`, {
+                method: 'GET',
+                headers: {
+                    'Authorization': this.token,
+                    'Content-Type': 'application/json'
+                }
+            });
+            
+            if (response.status === 401) {
+                console.log('🔥 Token verification failed: Unauthorized (401)');
+            } else if (response.ok) {
+                console.log('Token verified successfully');
+            } else {
+                console.warn(`Token verification resulted in unexpected status: ${response.status}`);
+            }
+        } catch (error) {
+            console.error('Error during token verification:', error);
+        }
     },
 
     post: async function(endpoint, data) {
